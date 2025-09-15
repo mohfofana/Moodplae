@@ -145,3 +145,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Thanks to all contributors who have helped with this project
 - Inspired by modern recommendation system architectures
+
