@@ -1,53 +1,43 @@
-# MoodPlay Phi
+# MoodPlae
 
-MoodPlay Phi is a sophisticated recommendation system designed to provide personalized content suggestions based on user mood, preferences, and contextual information. The system uses a combination of collaborative filtering, content-based filtering, and contextual bandits to deliver highly relevant recommendations.
+MoodPlae est un système de recommandation musicale intelligent qui s'adapte à l'humeur et au contexte de l'utilisateur. En utilisant des techniques avancées d'apprentissage automatique et l'API Spotify, MoodPlae crée des playlists personnalisées en temps réel.
 
-## Features
+## 🌟 Fonctionnalités
 
-- **Mood-based Recommendations**: Tailors suggestions based on the user's current mood
-- **Context-Aware**: Considers time of day, location, and device context
-- **Personalization**: Learns from user interactions to improve recommendations
-- **Scalable Architecture**: Designed to handle large numbers of users and items
-- **Comprehensive Testing**: Includes unit, integration, performance, and behavioral tests
+- **Recommandations basées sur l'humeur** : Analyse les émotions pour proposer une sélection adaptée
+- **Contexte intelligent** : Prend en compte l'heure, la localisation et l'activité
+- **Apprentissage continu** : S'améliore avec chaque interaction utilisateur
+- **Intégration Spotify** : Synchronisation complète avec votre bibliothèque musicale
+- **Architecture performante** : Conçue pour une expérience fluide et réactive
 
-## Project Structure
+## 🏗️ Structure du Projet
 
 ```
-moodplay_phi/
-├── moodplay_phi/               # Main package
-│   ├── __init__.py             # Package initialization
-│   ├── core.py                 # Main recommendation algorithm
-│   ├── models/                 # Data models
-│   │   ├── __init__.py
-│   │   ├── context.py          # Context field definitions
-│   │   ├── user_state.py       # User state management
-│   │   └── scoring.py          # Scoring functions
-│   └── utils/                  # Utility functions
-│       ├── __init__.py
-│       ├── data_gen.py         # Synthetic data generation
-│       └── metrics.py          # Evaluation metrics
-├── tests/                      # Test suite
-│   ├── __init__.py
-│   ├── conftest.py             # Test configuration
-│   ├── unit/                   # Unit tests
-│   ├── integration/            # Integration tests
-│   ├── performance/            # Performance tests
-│   └── behavioral/             # Behavioral tests
-├── data/                       # Data files
-│   └── .gitkeep
-├── scripts/                    # Utility scripts
-│   ├── generate_test_data.py   # Generate test data
-│   ├── run_benchmarks.py       # Run performance benchmarks
-│   └── simulate_users.py       # Simulate user interactions
-├── requirements.txt            # Production dependencies
-├── requirements-test.txt       # Development dependencies
-├── pytest.ini                 # Pytest configuration
-└── README.md                  # This file
+moodplae/
+├── moodplay_phi/              # Package principal
+│   ├── core/                  # Cœur du système de recommandation
+│   ├── models/                # Modèles de données
+│   ├── services/              # Services métier
+│   ├── integrations/          # Intégrations externes
+│   │   └── spotify_client.py  # Client Spotify
+│   ├── api/                   # Points d'entrée API
+│   └── config.py              # Configuration
+├── tests/                     # Tests automatisés
+│   ├── unit/                  # Tests unitaires
+│   ├── integration/           # Tests d'intégration
+│   └── performance/           # Tests de performance
+├── scripts/                   # Scripts utilitaires
+├── .env.example              # Exemple de configuration
+├── requirements.txt          # Dépendances
+└── README.md                 # Ce fichier
 ```
 
-## Getting Started
+## 🚀 Installation
 
-### Prerequisites
+### Prérequis
+- Python 3.8+
+- Compte développeur Spotify
+- Clés d'API Spotify
 
 - Python 3.8+
 - pip (Python package manager)
