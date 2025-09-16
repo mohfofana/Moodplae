@@ -1,10 +1,46 @@
 """
-Context field and state management for MoodPlay Phi.
+Gestion avancée du contexte pour MoodPlae.
+
+Ce module gère tous les aspects liés au contexte utilisateur, y compris :
+- L'humeur de l'utilisateur
+- L'activité en cours
+- Le contexte environnemental (météo, localisation, etc.)
+- Les préférences musicales
+- Les facteurs de fatigue et de motivation
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime, time
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Tuple
 import numpy as np
+
+# Constantes pour les types d'activité
+class ActivityType(Enum):
+    RELAXING = "relaxing"
+    WORKING = "working"
+    EXERCISING = "exercising"
+    COMMUTING = "commuting"
+    SOCIALIZING = "socializing"
+    OTHER = "other"
+    STUDYING = "studying"
+    READING = "reading"
+
+# Constantes pour les humeurs
+class MoodType(Enum):
+    HAPPY = "happy"
+    SAD = "sad"
+    ENERGETIC = "energetic"
+    CALM = "calm"
+    FOCUSED = "focused"
+    TIRED = "tired"
+    NEUTRAL = "neutral"
+
+# Constantes pour les périodes de la journée
+class TimeOfDay(Enum):
+    MORNING = "morning"      # 5h-11h59
+    AFTERNOON = "afternoon"  # 12h-17h59
+    EVENING = "evening"      # 18h-22h59
+    NIGHT = "night"          # 23h-4h59
 
 class ContextFieldType(Enum):
     """Types of context fields supported."""
@@ -14,50 +50,120 @@ class ContextFieldType(Enum):
     EMBEDDING = "embedding"
 
 @dataclass
+@dataclass
 class UserMood:
-    mood_label: str  # heureux, triste, énergique, etc.
-    confidence: float  # 0.0 à 1.0
-    source: str  # 'voice', 'text', 'behavioral_analysis'
+    """Représente l'humeur actuelle de l'utilisateur.
+    
+    Attributes:
+        mood_type: Type d'humeur (voir MoodType)
+        intensity: Intensité de l'humeur (0.0 à 1.0)
+        confidence: Confiance de la détection (0.0 à 1.0)
+        source: Source de la détection ('voice', 'text', 'behavioral')
+        timestamp: Horodatage de la détection
+    """
+    mood_type: MoodType
+    intensity: float = 1.0
+    confidence: float = 0.9
+    source: str = 'behavioral'
+    timestamp: datetime = field(default_factory=datetime.utcnow)
 
 @dataclass
 class ActivityContext:
-    activity_type: str  # travail, sport, détente, etc.
+    """Contexte d'activité de l'utilisateur.
+    
+    Attributes:
+        activity_type: Type d'activité (voir ActivityType)
+        start_time: Début de l'activité
+        device: Appareil utilisé
+        is_moving: Si l'utilisateur est en mouvement
+        location: Lieu de l'activité (si disponible)
+    """
+    activity_type: ActivityType
     start_time: datetime
     device: str  # mobile, desktop, tablette
     is_moving: bool = False
+    location: Optional[Dict[str, float]] = None  # {lat: float, lon: float}
 
 @dataclass
 class AudioPreferences:
-    current_track_bpm: Optional[float] = None
-    current_track_energy: Optional[float] = None
-    current_track_valence: Optional[float] = None
-    recent_genres: List[str] = field(default_factory=list)
-    recent_artists: List[str] = field(default_factory=list)
-
-@dataclass
-class ContextSignals:
-    """
-    Conteneur pour tous les signaux contextuels.
+    """Préférences audio et caractéristiques des morceaux.
     
     Attributes:
-        timestamp: Horodatage actuel
-        location: Position géographique (lat, lon)
-        activity: Activité détectée (marcher, conduire, être assis, etc.)
-        mood: Humeur détectée (texte libre)
-        spotify_data: Données brutes de l'API Spotify
-        recent_tracks: Historique récent des titres écoutés
-        top_artists: Artistes les plus écoutés
-        top_genres: Genres musicaux préférés
-        current_weather: Données météorologiques actuelles
-        is_moving: Si l'utilisateur est en déplacement
-        transportation_mode: Mode de transport (à pied, voiture, transports en commun)
+        preferred_bpm_range: Plage de BPM préférée (min, max)
+        preferred_energy: Niveau d'énergie préféré (0.0-1.0)
+        preferred_valence: Niveau de valence préféré (0.0-1.0)
+        liked_genres: Genres appréciés avec score
+        liked_artists: Artistes appréciés avec score
+        recent_tracks: Derniers titres écoutés
     """
-    # Données temporelles
-    timestamp: datetime = field(default_factory=datetime.now)
-    day_type: str = 'weekday'  # 'weekday', 'weekend', 'holiday'
+    preferred_bpm_range: Tuple[float, float] = (80, 120)
+    preferred_energy: float = 0.7
+    preferred_valence: float = 0.6
+    liked_genres: Dict[str, float] = field(default_factory=dict)  # genre: score
+    liked_artists: Dict[str, float] = field(default_factory=dict)  # artist_id: score
+    recent_tracks: List[Dict] = field(default_factory=list)  # Format: {id, name, artists, timestamp}
+
+@dataclass
+class UserContext:
+    """
+    Contexte complet de l'utilisateur pour les recommandations.
     
-    # Localisation et activité
-    location: Optional[Tuple[float, float]] = None
+    Attributes:
+        user_id: Identifiant unique de l'utilisateur
+        current_mood: Humeur actuelle de l'utilisateur
+        current_activity: Activité en cours
+        audio_prefs: Préférences audio
+        time_of_day: Période de la journée (matin, après-midi, etc.)
+        weather: Données météorologiques actuelles
+        device_info: Informations sur l'appareil
+        last_updated: Dernière mise à jour du contexte
+    """
+    user_id: str
+    current_mood: UserMood
+    current_activity: ActivityContext
+    audio_prefs: AudioPreferences = field(default_factory=AudioPreferences)
+    time_of_day: TimeOfDay = TimeOfDay.AFTERNOON
+    weather: Optional[Dict[str, Any]] = None
+    device_info: Dict[str, Any] = field(default_factory=dict)
+    last_updated: datetime = field(default_factory=datetime.utcnow)
+    
+    def update_time_of_day(self):
+        """Met à jour la période de la journée en fonction de l'heure actuelle."""
+        now = datetime.now().time()
+        
+        if time(5, 0) <= now < time(12, 0):
+            self.time_of_day = TimeOfDay.MORNING
+        elif time(12, 0) <= now < time(18, 0):
+            self.time_of_day = TimeOfDay.AFTERNOON
+        elif time(18, 0) <= now < time(23, 0):
+            self.time_of_day = TimeOfDay.EVENING
+        else:
+            self.time_of_day = TimeOfDay.NIGHT
+    
+    def get_context_summary(self) -> Dict[str, Any]:
+        """Retourne un résumé du contexte actuel."""
+        return {
+            "mood": {
+                "type": self.current_mood.mood_type.value,
+                "intensity": self.current_mood.intensity,
+                "source": self.current_mood.source
+            },
+            "activity": {
+                "type": self.current_activity.activity_type.value,
+                "device": self.current_activity.device,
+                "is_moving": self.current_activity.is_moving
+            },
+            "time": {
+                "time_of_day": self.time_of_day.value,
+                "last_updated": self.last_updated.isoformat()
+            },
+            "audio_preferences": {
+                "preferred_bpm": self.audio_prefs.preferred_bpm_range,
+                "preferred_energy": self.audio_prefs.preferred_energy,
+                "liked_genres": list(self.audio_prefs.liked_genres.keys())[:5],
+                "recent_artists": list(self.audio_prefs.liked_artists.keys())[:5]
+            }
+        }
     activity: Optional[str] = None
     is_moving: bool = False
     transportation_mode: Optional[str] = None

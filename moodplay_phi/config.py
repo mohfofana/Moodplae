@@ -15,10 +15,27 @@ class Config:
     DEBUG: bool = os.getenv('DEBUG', 'False').lower() == 'true'
     ENV: str = os.getenv('ENV', 'development')
     SECRET_KEY: str = os.getenv('SECRET_KEY', 'dev-secret-key')
+    APP_NAME: str = "MoodPlae"
+    VERSION: str = "0.1.0"
     
     # Base de données
     DATABASE_URL: str = os.getenv('DATABASE_URL', 'sqlite:///./moodplae.db')
+    
+    # Configuration du logging
+    LOG_LEVEL: str = os.getenv('LOG_LEVEL', 'INFO')
+    LOG_FILE: str = os.getenv('LOG_FILE', 'moodplae.log')
+    
+    # Configuration de l'interaction utilisateur
+    DEFAULT_MOOD: str = "NEUTRAL"
+    DEFAULT_ACTIVITY: str = "RELAXING"
+    
+    # Seuils de confiance pour la détection
+    MOOD_CONFIDENCE_THRESHOLD: float = 0.5
+    ACTIVITY_CONFIDENCE_THRESHOLD: float = 0.5
     TEST_DATABASE_URL: str = os.getenv('TEST_DATABASE_URL', 'sqlite:///./test_moodplae.db')
+    
+    # Configuration API Externes
+    WEATHER_API_KEY: str = os.getenv('WEATHER_API_KEY', '')
     
     # Configuration Spotify
     SPOTIFY_CLIENT_ID: str = os.getenv('SPOTIFY_CLIENT_ID', '')
